@@ -10,7 +10,6 @@ let
 in
 mkShell {
   buildInputs = [
-    gdb
     dosbox
     pmdmini
   ];

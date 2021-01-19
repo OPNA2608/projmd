@@ -3,6 +3,10 @@
 , SDL2
 }:
 
+let
+  shaNormal = "1pf8bap33jwj97fdb321b0lc1hc0jbay4kv48yvfyv1z7gr3770i";
+  shaDarwin = "17ckp9nmq56izri9lbh04yi1l2p82ybkn12hljwkwy73jx4870g6";
+in
 stdenv.mkDerivation rec {
   pname = "pmdmini";
   version = "2.0";
@@ -11,7 +15,7 @@ stdenv.mkDerivation rec {
     owner = "gzaffin";
     repo = "pmdmini";
     rev = "v${version}";
-    sha256 = "1pf8bap33jwj97fdb321b0lc1hc0jbay4kv48yvfyv1z7gr3770i";
+    sha256 = if stdenv.hostPlatform.isDarwin then shaDarwin else shaNormal;
   };
 
   postPatch = ''
