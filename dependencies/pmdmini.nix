@@ -23,6 +23,10 @@ stdenv.mkDerivation rec {
     substituteInPlace src/fmgen/headers.h \
       --replace '#include <linux/stat.h>' '//#include <linux/stat.h>'
 
+    # malloc.h missing on Darwin
+    substituteInPlace src/pmdwin/util.cpp \
+      --replace '<malloc.h>' '<stdlib.h>'
+
     # no install step
     substituteInPlace CMakeLists.txt \
       --replace 'EXCLUDE_FROM_ALL' "" \
