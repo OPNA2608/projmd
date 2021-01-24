@@ -1,4 +1,4 @@
-Extract RSS samples into this directory (for legal reasons not included):
+Extract RSS samples into pmdmini directory (for legal reasons not included):
 
 - 2608_BD.WAV
 - 2608_HH.WAV
@@ -10,4 +10,5 @@ Extract RSS samples into this directory (for legal reasons not included):
 TODO
 
 - pmdplay has some pcmdir functionality, only looks up RSS samples in CWD. figure that out
-- easy PMD compilation setup via DOSBox
+- ^ workaround: script for setting up pmdmini with PWD = /pmdmini/ directory
+- maybe a file watcher for automatic recompiling & playback?

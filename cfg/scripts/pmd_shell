@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+DOSBOX=dosbox
+
+PROJMD_TMPFILE=$(mktemp dosbox_init.conf.XXXXXXXX)
+sed "s^@PROJMD_BASE@^$PROJMD_BASE^g" "$PROJMD_BASE"/cfg/dosbox_init.conf > "$PROJMD_TMPFILE"
+
+unset SDL_VIDEODRIVER
+"$DOSBOX" -userconf -conf "$PROJMD_TMPFILE"
+
+rm -f "$PROJMD_TMPFILE"
+unset PROJMD_TMPFILE
