@@ -14,12 +14,11 @@ stdenv.mkDerivation rec {
   buildInputs = [ dosbox pmdmini ];
 
   installPhase = ''
-    pushd $src
+    cd $src
     for script in *; do
       install -Dm755 $script $out/bin/$script
-      substituteInPlace $out/bin/$script \
-        --replace 'DOSBOX=dosbox' 'DOSBOX=${dosbox}/bin/dosbox'
     done
-    popd
+    substituteInPlace $out/bin/pmd \
+      --replace 'DOSBOX=dosbox' 'DOSBOX=${dosbox}/bin/dosbox'
   '';
 }

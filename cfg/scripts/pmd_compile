@@ -1,37 +1,3 @@
 #!/usr/bin/env bash
 
-DOSBOX=dosbox
-
-usage() {
-  echo "$0: MODULE.MML [MODULE2.MML...]" >&2
-}
-
-if [ $# -lt 1 ]; then
-  usage
-  exit 1
-fi
-
-PROJMD_DBINIT=$(mktemp dosbox_init.conf.XXXXXXXX)
-sed "s^@PROJMD_BASE@^$PROJMD_BASE^g" "$PROJMD_BASE"/cfg/dosbox_init.conf > "$PROJMD_DBINIT"
-
-for mmlfile do
-  PROJMD_MMLFILE_FULLPATH="$(realpath "$mmlfile")"
-  PROJMD_MMLFILE_WORKSPACE="${PROJMD_MMLFILE_FULLPATH##$PROJMD_BASE/workspace/}"
-  if [ "$PROJMD_MMLFILE_WORKSPACE" == "$PROJMD_MMLFILE_FULLPATH" ]; then
-    echo "File '$mmlfile' is not relative to workspace '$PROJMD_BASE/workspace', skipping..." >&2
-    continue
-  fi
-
-  PROJMD_DBCMD=$(mktemp dosbox_cmd.conf.XXXXXXXX)
-  sed "s^@PROJMD_MMLFILE_WORKSPACE@^$PROJMD_MMLFILE_WORKSPACE^g" "$PROJMD_BASE"/cfg/dosbox_cmd.conf > "$PROJMD_DBCMD"
-
-  "$DOSBOX" -conf "$PROJMD_DBINIT" -conf "$PROJMD_DBCMD" -conf "$PROJMD_BASE"/cfg/dosbox_deinit.conf
-
-  cat "$PROJMD_BASE"/PMD/MC.LOG
-  rm -f "$PROJMD_BASE"/PMD/MC.LOG
-  rm -f "$PROJMD_DBCMD"
-  unset PROJMD_DBCMD
-done
-
-rm -f $PROJMD_DBINIT
-unset PROJMD_DBINIT
+pmd compile "$@"
