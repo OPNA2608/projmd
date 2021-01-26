@@ -20,7 +20,7 @@ mkShell {
   ];
 
   shellHook = ''
-    export PROJMD_BASE=${if projmdDir != null then projmdDir else "$PWD"}
+    export PROJMD_BASE=${if projmdDir != null then projmdDir else "$(realpath .)"}
     echo "=== Set ProjMD base directory PROJMD_BASE ==="
     echo "-> $PROJMD_BASE"
     echo ""
