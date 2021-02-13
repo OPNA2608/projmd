@@ -43,6 +43,10 @@ stdenv.mkDerivation rec {
       url = "https://github.com/gzaffin/pmdmini/commit/6b59fdf6faf1b0fac37b1852e1a4c010f92f3b0d.patch";
       sha256 = "1fk4kcrh8xhm2gyb76az9ab9lg6prpngjgxl99823pl16inpsi63";
     })
+    (fetchpatch {
+      url = "https://github.com/gzaffin/pmdmini/commit/92bbf2aa8d82bf20db29165d12bb7fea996de39e.patch";
+      sha256 = "0ji1k3i6ghap1kwfca7sl1wvkv449gdji4jc5lyaiwnv08kiqlxb";
+    })
   ];
 
   nativeBuildInputs = [ cmake pkg-config ];

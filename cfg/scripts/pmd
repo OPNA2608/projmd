@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
+set -e
+
 DOSBOX=dosbox
+NKF=nkf
+PMDPLAY=pmdplay
+FSWATCH=fswatch
 PMDNAME=$(basename $0)
 
 declare -a COMMANDS_LIST=(
-  compile shell play
+  compile shell play watch
 )
 declare -A COMMANDS_MAP
 for key in ${!COMMANDS_LIST[@]}; do
@@ -64,16 +69,16 @@ do_compile() {
     # TODO realpath workspace path, see macOS problem interactively worked around earlier
     PROJMD_MMLFILE_WORKSPACE="${PROJMD_MMLFILE_FULLPATH##${PROJMD_BASE}/workspace/}"
     if [ "${PROJMD_MMLFILE_WORKSPACE}" == "${PROJMD_MMLFILE_FULLPATH}" ]; then
-      echo "File '${PROJMD_MMLFILE_FULLPATH}' is not relative to workspace '$PROJMD_BASE/workspace', skipping..." >&2
+      echo "File '${PROJMD_MMLFILE_FULLPATH}' is not relative to workspace '${PROJMD_BASE}/workspace', skipping..." >&2
       continue
     fi
 
     PROJMD_DBCMD=$(mktemp dosbox_cmd.conf.XXXXXXXX)
     sed "s^@PROJMD_MMLFILE_WORKSPACE@^${PROJMD_MMLFILE_WORKSPACE}^g" "${PROJMD_BASE}/cfg/dosbox_cmd.conf" > "${PROJMD_DBCMD}"
 
-    "${DOSBOX}" -conf "${PROJMD_DBINIT}" -conf "${PROJMD_DBCMD}" -conf "${PROJMD_BASE}/cfg/dosbox_deinit.conf"
+    "${DOSBOX}" -conf "${PROJMD_DBINIT}" -conf "${PROJMD_DBCMD}" -conf "${PROJMD_BASE}/cfg/dosbox_deinit.conf" >&2
 
-    cat "${PROJMD_BASE}/PMD/MC.LOG"
+    cat "${PROJMD_BASE}/PMD/MC.LOG" | "${NKF}" -S
     rm -f "${PROJMD_BASE}/PMD/MC.LOG"
     rm -f "${PROJMD_DBCMD}"
     unset PROJMD_DBCMD
@@ -92,7 +97,82 @@ do_shell() {
   dosbox_deinit
 }
 
+## play
+usage_play() {
+  echo "${PMDNAME} play: MODULE.M" >&2
+}
+
+do_play() {
+  if [ $# -ne 1 ]; then
+    usage_play
+    exit 1
+  fi
+
+  PROJMD_MFILE_FULLPATH="$(realpath "$1")"
+  pushd "${PROJMD_BASE}/pmdmini" >/dev/null
+  "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}"
+  popd >/dev/null
+}
+
+## watch
+usage_watch() {
+  echo "${PMDNAME} watch: MODULE.MML" >&2
+}
+
+do_watch() {
+  PROJMD_WATCH_LIST=""
+
+  if [ $# -ne 1 ]; then
+    usage_watch
+    exit 1
+  fi
+
+  PROJMD_MMLFILE_FULLPATH="$(realpath "$1")"
+  # TODO realpath workspace path, see macOS problem interactively worked around earlier
+  PROJMD_MMLFILE_WORKSPACE="${PROJMD_MMLFILE_FULLPATH##${PROJMD_BASE}/workspace/}"
+  if [ "${PROJMD_MMLFILE_WORKSPACE}" == "${PROJMD_MMLFILE_FULLPATH}" ]; then
+    echo "File '${PROJMD_MMLFILE_FULLPATH}' is not relative to workspace '${PROJMD_BASE}/workspace', can't watch!" >&2
+    exit 1
+  fi
+
+  PROJMD_MMLFILE_EXT=".$(echo "$1" | rev | cut -d'.' -f1 | rev)"
+  PROJMD_MFILE_BASENAME="$(basename "$1" "${PROJMD_MMLFILE_EXT}" | tr '[a-z]' '[A-Z]')"
+
+  echo "Watching ${PROJMD_MMLFILE_FULLPATH}..."
+  PROJMD_WATCH_COMPILELOG="$(mktemp)"
+  while true; do
+    set +e
+    do_compile "${PROJMD_MMLFILE_FULLPATH}" | tee "${PROJMD_WATCH_COMPILELOG}"
+    PROJMD_WATCH_PLAYINGID=""
+    if ! grep 'Error' "${PROJMD_WATCH_COMPILELOG}" >/dev/null; then
+      PROJMD_WATCH_COMPILEDFILE="$(dirname "${PROJMD_MMLFILE_FULLPATH}")"
+      PROJMD_WATCH_COMPILEDFILE="${PROJMD_WATCH_COMPILEDFILE}/${PROJMD_MFILE_BASENAME}"
+      PROJMD_WATCH_COMPILEDFILEEXT=".M"
+      if grep -i '#Filename' "${PROJMD_MMLFILE_FULLPATH}" >/dev/null; then
+        PROJMD_WATCH_COMPILEDFILEEXT="$(grep -i '#Filename' "${PROJMD_MMLFILE_FULLPATH}" | rev | cut -d' ' -f1 | rev | tr -d '\r')"
+      fi
+      PROJMD_WATCH_COMPILEDFILE="${PROJMD_WATCH_COMPILEDFILE}${PROJMD_WATCH_COMPILEDFILEEXT}"
+      echo pmd play "${PROJMD_WATCH_COMPILEDFILE}"
+      do_play "${PROJMD_WATCH_COMPILEDFILE}" &
+      PROJMD_WATCH_PLAYINGID="$!"
+    fi
+    PROJMD_WATCH_EVENT="$("${FSWATCH}" --one-event --event Updated ${PROJMD_MMLFILE_FULLPATH})"
+    if [ "x${PROJMD_WATCH_PLAYINGID}" != "x" ]; then
+      # TODO not great, but killing pmd_play/do_play doesn't kill pmdplay
+      killall pmdplay >/dev/null 2>&1
+    fi
+    set -e
+    if [ "x${PROJMD_WATCH_EVENT}" == "x" ]; then
+      break
+    fi
+  done
+  rm -f "${PROJMD_WATCH_COMPILELOG}"
+  echo "Done watching ${PROJMD_MMLFILE_FULLPATH}."
+}
+
+
 ### End definitions
 
 do_${PMDCMD} "$@"
 
+set +e
