@@ -1,5 +1,5 @@
 { pkgs ? import (
-  builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/de9fd44809f6629b64ee5d29cb3ac8c9e49904d3.tar.gz"
+  builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/a9efc15c162d747295cb97964512cbc7fd2593e7.tar.gz"
   ) { }
 , projmdDir ? null
 }:
@@ -7,7 +7,7 @@
 with pkgs;
 
 let
-  pmdmini = enableDebugging (callPackage ./cfg/pmdmini.nix { });
+  pmdmini = /* enableDebugging broken, see https://github.com/NixOS/nixpkgs/issues/136756 */ (callPackage ./cfg/pmdmini.nix { });
   projmd_scripts = callPackage ./cfg/scripts.nix {
     pmdmini = pmdmini;
   };
