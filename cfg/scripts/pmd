@@ -6,6 +6,7 @@ DOSBOX=dosbox
 NKF=nkf
 PMDPLAY=pmdplay
 FSWATCH=fswatch
+KILLALL=killall
 PMDNAME=$(basename $0)
 
 declare -a COMMANDS_LIST=(
@@ -110,7 +111,7 @@ do_play() {
 
   PROJMD_MFILE_FULLPATH="$(realpath "$1")"
   pushd "${PROJMD_BASE}/pmdmini" >/dev/null
-  "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}"
+  "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}" -- -- 0
   popd >/dev/null
 }
 
@@ -159,7 +160,7 @@ do_watch() {
     PROJMD_WATCH_EVENT="$("${FSWATCH}" --one-event --event Updated ${PROJMD_MMLFILE_FULLPATH})"
     if [ "x${PROJMD_WATCH_PLAYINGID}" != "x" ]; then
       # TODO not great, but killing pmd_play/do_play doesn't kill pmdplay
-      killall pmdplay >/dev/null 2>&1
+      ${KILLALL} pmdplay >/dev/null 2>&1
     fi
     set -e
     if [ "x${PROJMD_WATCH_EVENT}" == "x" ]; then
