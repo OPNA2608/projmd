@@ -11,7 +11,7 @@ stdenv.mkDerivation rec {
   dontConfigure = true;
   dontBuild = true;
 
-  buildInputs = [ dosbox nkf pmdmini fswatch killall ];
+  propagatedBuildInputs = [ dosbox nkf pmdmini fswatch killall ];
 
   installPhase = ''
     cd $src
