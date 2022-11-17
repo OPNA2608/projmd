@@ -1,5 +1,5 @@
 { stdenv, lib
-, dosbox, nkf, pmdmini, fswatch, killall
+, dosbox, nkf, pmdmini, mpv, fswatch, killall
 }:
 
 stdenv.mkDerivation rec {
@@ -11,7 +11,7 @@ stdenv.mkDerivation rec {
   dontConfigure = true;
   dontBuild = true;
 
-  propagatedBuildInputs = [ dosbox nkf pmdmini fswatch killall ];
+  propagatedBuildInputs = [ dosbox nkf pmdmini mpv fswatch killall ];
 
   installPhase = ''
     cd $src
@@ -22,6 +22,7 @@ stdenv.mkDerivation rec {
       --replace 'DOSBOX=dosbox' 'DOSBOX=${dosbox}/bin/dosbox' \
       --replace 'NKF=nkf' 'NKF=${nkf}/bin/nkf' \
       --replace 'PMDPLAY=pmdplay' 'PMDPLAY=${pmdmini}/bin/pmdplay' \
+      --replace 'MPV=mpv' 'MPV=${mpv}/bin/mpv' \
       --replace 'FSWATCH=fswatch' 'FSWATCH=${fswatch}/bin/fswatch' \
       --replace 'KILLALL=killall' 'KILLALL=${killall}/bin/killall'
   '';

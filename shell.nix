@@ -1,6 +1,4 @@
-{ pkgs ? import (
-  builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/a9efc15c162d747295cb97964512cbc7fd2593e7.tar.gz"
-  ) { }
+{ pkgs ? import <nixpkgs> {}
 , projmdDir ? null
 }:
 

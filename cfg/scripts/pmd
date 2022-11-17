@@ -5,8 +5,8 @@ set -e
 DOSBOX=dosbox
 NKF=nkf
 PMDPLAY=pmdplay
+MPV=mpv
 FSWATCH=fswatch
-KILLALL=killall
 PMDNAME=$(basename $0)
 
 declare -a COMMANDS_LIST=(
@@ -77,7 +77,7 @@ do_compile() {
     PROJMD_DBCMD=$(mktemp dosbox_cmd.conf.XXXXXXXX)
     sed "s^@PROJMD_MMLFILE_WORKSPACE@^${PROJMD_MMLFILE_WORKSPACE}^g" "${PROJMD_BASE}/cfg/dosbox_cmd.conf" > "${PROJMD_DBCMD}"
 
-    "${DOSBOX}" -conf "${PROJMD_DBINIT}" -conf "${PROJMD_DBCMD}" -conf "${PROJMD_BASE}/cfg/dosbox_deinit.conf" >&2
+    env SDL_AUDIODRIVER=dummy "${DOSBOX}" -conf "${PROJMD_DBINIT}" -conf "${PROJMD_DBCMD}" -conf "${PROJMD_BASE}/cfg/dosbox_deinit.conf" >&2
 
     cat "${PROJMD_BASE}/PMD/MC.LOG" | "${NKF}" -S
     rm -f "${PROJMD_BASE}/PMD/MC.LOG"
@@ -111,7 +111,21 @@ do_play() {
 
   PROJMD_MFILE_FULLPATH="$(realpath "$1")"
   pushd "${PROJMD_BASE}/pmdmini" >/dev/null
-  "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}" -- -- 0
+
+  # "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}" -- -- 0
+  # pmdplay on newer SDL2 versions cannot be stopped, and it might be killing my pulseaudio setup while streaming
+  env SDL_AUDIODRIVER=dummy "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}" "${PROJMD_MFILE_FULLPATH}.WAV"
+  declare -a MPV_FLAGS=(
+    --force-window=no
+    --term-playing-msg='=> Press L to toggle looping, q to quit <='
+    --term-status-msg='${filename/no-ext}: ${playback-time} / ${duration}'
+    --term-osd-bar --term-osd-bar-chars='[-|-]'
+    --msg-level=cplayer=warn
+  )
+  echo
+  "${MPV}" "${PROJMD_MFILE_FULLPATH}.WAV" "${MPV_FLAGS[@]}"
+  echo
+
   popd >/dev/null
 }
 
@@ -159,8 +173,8 @@ do_watch() {
     fi
     PROJMD_WATCH_EVENT="$("${FSWATCH}" --one-event --event Updated ${PROJMD_MMLFILE_FULLPATH})"
     if [ "x${PROJMD_WATCH_PLAYINGID}" != "x" ]; then
-      # TODO not great, but killing pmd_play/do_play doesn't kill pmdplay
-      ${KILLALL} pmdplay >/dev/null 2>&1
+      kill $(ps -o pid= --ppid "${PROJMD_WATCH_PLAYINGID}") 2>/dev/null
+      kill "${PROJMD_WATCH_PLAYINGID}" 2>/dev/null
     fi
     set -e
     if [ "x${PROJMD_WATCH_EVENT}" == "x" ]; then
