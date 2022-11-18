@@ -2,3 +2,5 @@
 *
 # Except this file
 !.gitignore
+# And a recursive symlink,so the player can find the RSS samples placed in this directory
+!.pmdplay

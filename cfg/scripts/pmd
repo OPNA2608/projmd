@@ -110,11 +110,10 @@ do_play() {
   fi
 
   PROJMD_MFILE_FULLPATH="$(realpath "$1")"
-  pushd "${PROJMD_BASE}/pmdmini" >/dev/null
 
   # "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}" -- -- 0
   # pmdplay on newer SDL2 versions cannot be stopped, and it might be killing my pulseaudio setup while streaming
-  env SDL_AUDIODRIVER=dummy "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}" "${PROJMD_MFILE_FULLPATH}.WAV"
+  env HOME="${PROJMD_BASE}/pmdmini" SDL_AUDIODRIVER=dummy "${PMDPLAY}" "${PROJMD_MFILE_FULLPATH}" "${PROJMD_MFILE_FULLPATH}.WAV"
   declare -a MPV_FLAGS=(
     --force-window=no
     --term-playing-msg='=> Press L to toggle looping, q to quit <='
@@ -125,8 +124,6 @@ do_play() {
   echo
   "${MPV}" "${PROJMD_MFILE_FULLPATH}.WAV" "${MPV_FLAGS[@]}"
   echo
-
-  popd >/dev/null
 }
 
 ## watch
