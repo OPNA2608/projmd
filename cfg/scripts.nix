@@ -1,7 +1,19 @@
-{ stdenv, lib
-, dosbox, nkf, pmdmini, mpv, fswatch, killall
+{ stdenv
+, lib
+, dosbox
+, nkf
+, pmdmini
+, mpv-unwrapped
+, fswatch
+, killall
 }:
 
+let
+  mpv = if (lib.strings.versionAtLeast mpv-unwrapped.version "0.35.0") then mpv-unwrapped.override {
+    # https://github.com/mpv-player/mpv/issues/10859 breaks playback on systems that don't actually use PW
+    pipewireSupport = false;
+  } else mpv-unwrapped;
+in
 stdenv.mkDerivation rec {
   name = "projmd-scripts";
 
@@ -11,7 +23,14 @@ stdenv.mkDerivation rec {
   dontConfigure = true;
   dontBuild = true;
 
-  propagatedBuildInputs = [ dosbox nkf pmdmini mpv fswatch killall ];
+  propagatedBuildInputs = [
+    dosbox
+    nkf
+    pmdmini
+    mpv
+    fswatch
+    killall
+  ];
 
   installPhase = ''
     cd $src
