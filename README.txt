@@ -1,4 +1,4 @@
-Extract RSS samples into pmdmini directory (for legal reasons not included):
+Extract RSS samples into .pmdplay directory (for legal reasons not included):
 
 - 2608_BD.WAV
 - 2608_HH.WAV

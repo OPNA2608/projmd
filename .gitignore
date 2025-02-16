@@ -1,2 +1,6 @@
 # WIP / Dev stuff
 *.log
+
+
+# Created because we need to mess with $HOME for pmdmini
+.config/
