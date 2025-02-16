@@ -1,2 +1,6 @@
 # WIP / Dev stuff
 *.log
+
+
+# Created because we mess with $HOME
+.config/

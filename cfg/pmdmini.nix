@@ -5,13 +5,13 @@
 
 stdenv.mkDerivation rec {
   pname = "pmdmini";
-  version = "unstable-2021-05-02";
+  version = "0-unstable-2023-05-26";
 
   src = fetchFromGitHub {
     owner = "gzaffin";
     repo = "pmdmini";
-    rev = "aa29450a0dbb2be9240d5ec0518b73e4f05e7a3a";
-    sha256 = "0xapri5rrk3lilyszxigfm2lcy4ikfsd25xym7qxz7r0psq367sk";
+    rev = "b878a46ef18b1a8061405b3ac57f5f779f198042";
+    hash = "sha256-CtyobNCNWWGxXeCm9m64Mr9yHcNe4Of7vA9IhcEnVU8=";
   };
 
   nativeBuildInputs = [ cmake pkg-config ];
