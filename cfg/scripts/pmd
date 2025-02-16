@@ -168,7 +168,7 @@ do_watch() {
       do_play "${PROJMD_WATCH_COMPILEDFILE}" &
       PROJMD_WATCH_PLAYINGID="$!"
     fi
-    PROJMD_WATCH_EVENT="$("${FSWATCH}" --one-event --event Updated ${PROJMD_MMLFILE_FULLPATH})"
+    PROJMD_WATCH_EVENT="$("${FSWATCH}" --one-event --event Updated --event AttributeModified ${PROJMD_MMLFILE_FULLPATH})"
     if [ "x${PROJMD_WATCH_PLAYINGID}" != "x" ]; then
       kill $(ps -o pid= --ppid "${PROJMD_WATCH_PLAYINGID}") 2>/dev/null
       kill "${PROJMD_WATCH_PLAYINGID}" 2>/dev/null
